@@ -97,8 +97,8 @@ void loop() {
       }
     }
   }
-  if (currentState) {currentState->loop();}
-  updateServos();
+  //if (currentState) {currentState->loop();}
+  //updateServos();
 }
 
 
