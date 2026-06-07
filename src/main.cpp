@@ -28,7 +28,7 @@ void setup() {
   attachServos();
   setupCom();
   setGait(currentGait);
-  //setupGyro();
+  setupGyro();
   loadCalibrationOffsets();
 
   currentState = initializationState;
@@ -38,7 +38,7 @@ void setup() {
 }
 
 void loop() {
-  //gyroStart();
+  gyroUpdate();
   static unsigned long previousLoopTime = 0;
   unsigned long currentLoopTime = micros();
   if (currentLoopTime - previousLoopTime < loopPeriod) return;
@@ -51,7 +51,7 @@ void loop() {
   //controller is not connected
   if (!connected && controlMode == AUTO) {changeState(sleepState);}
 
-  //================ Walking ================
+  //=================== Walking ===================
   if (receiveType == RC_CONTROL_DATA) {
     ButtonEvent event = readButtonEvent();
     switch (event) {
@@ -97,8 +97,8 @@ void loop() {
       }
     }
   }
-  //if (currentState) {currentState->loop();}
-  //updateServos();
+  if (currentState) {currentState->loop();}
+  updateServos();
 }
 
 
