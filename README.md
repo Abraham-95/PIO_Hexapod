@@ -38,4 +38,4 @@ PIO Hexapod v1.10 -- March 14, 2026
  - Gyro.h, Gyro.cpp, GyroState.cpp
 
 PIO Hexapod v1.11 -- June 7, 2026
- - Update Gyro with BNO085
+ - Update Gyro with BNO085 & OLED
