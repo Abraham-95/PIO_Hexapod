@@ -29,6 +29,7 @@ void setup() {
   setupCom();
   setGait(currentGait);
   setupGyro();
+  setupDisplay();
   loadCalibrationOffsets();
 
   currentState = initializationState;
@@ -39,6 +40,8 @@ void setup() {
 
 void loop() {
   gyroUpdate();
+  drawDisplay();
+
   static unsigned long previousLoopTime = 0;
   unsigned long currentLoopTime = micros();
   if (currentLoopTime - previousLoopTime < loopPeriod) return;

@@ -99,4 +99,6 @@ extern StandingState *standingState;
 extern WalkingState *walkingState;
 extern GyroState *gyroState;
 
+const char* stateToString(State* state);
+
 void changeState(State* next);
