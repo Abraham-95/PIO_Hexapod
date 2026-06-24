@@ -68,7 +68,8 @@ void WalkingState::loop() {
   }
 
   if (!isIdle()) {
-    float progressChangeAmount = max(abs(forwardAmount), abs(turnAmount)) * cGait.gaitSpeedMult * globalSpeedMult * potRightPercentage;
+    float progressChangeAmount = max(abs(forwardAmount), abs(turnAmount))
+      * cGait.gaitSpeedMult * globalSpeedMult * potRightPercentage;
     progressChangeAmount = constrain(progressChangeAmount, 0, 80);
 
     for (int i = 0; i < 6; i++) {cycleProgress[i] += progressChangeAmount;
@@ -144,7 +145,7 @@ Vector3 WalkingState::getGaitPoint(int leg, float pushFraction) {
   }
 
   //Lifting
-  else{
+  else {
     if(legStates[leg] != Lifting) {cycleStartPoints[leg] = currentLegPositions[leg];}
     legStates[leg] = Lifting;
 

@@ -64,18 +64,57 @@ void StandingState::loop() {
   }
   else if (StandingPhase == STAND_HOLD) {
     standingEndPoint = Vector3(0, distanceFromCenter, distanceFromGround);
+
+    #if DEBUG_GYRO
+    static uint32_t lastDebug = 0;
+    bool printDebug = false;
+
+    if (millis() - lastDebug >= 100) { // 10 Hz
+      lastDebug = millis();
+      printDebug = true;
+
+      Serial.println("\n========= STANDING DEBUG =========");
+      Serial.print("Pitch Raw : "); Serial.print(pitch, 1);
+      Serial.print("\tPitch Filt : "); Serial.println(pitchFiltered, 1);
+
+      Serial.print("Roll Raw  : "); Serial.print(roll, 1);
+      Serial.print("\tRoll Filt : "); Serial.println(rollFiltered, 1);
+      Serial.println("----------------------------------");
+    }
+    #endif
+
+    stabilization(STANDING_MODE);
+
     for (int i = 0; i < 6; i++) {
-      SCPA[i][2] = standingEndPoint;
-      moveToPos(i, standingEndPoint);
+      Vector3 bodyPoint = convertLocalLegPointToGlobal(standingEndPoint, i);
+
+      bodyPoint.x -= balanceOutput.xShift;
+      bodyPoint.y -= balanceOutput.yShift;
+
+      bodyPoint.z += bodyPoint.x * sin(balanceOutput.rollOffset)
+                   - bodyPoint.y * sin(balanceOutput.pitchOffset);
+
+      Vector3 localPoint = convertGlobalLegPointToLocal(bodyPoint, i);
+      moveToPos(i, localPoint);
+
+      //SCPA[i][2] = standingEndPoint;
+      //moveToPos(i, standingEndPoint);
+
+      #if DEBUG_GYRO
+      if (printDebug) {
+        Serial.print("Leg "); Serial.print(i);
+        Serial.print(" X ="); Serial.print(localPoint.x);
+        Serial.print(" Y ="); Serial.print(localPoint.y);
+        Serial.print(" Z ="); Serial.println(localPoint.z);
+      }
+      #endif
     }
   }
 }
 
 void StandingState::calculateLegAdjustOrder(){
   // Fill with indices 0..5
-  for (int i = 0; i < 6; i++) {
-    legAdjustOrder[i] = i;
-  }
+  for (int i = 0; i < 6; i++) {legAdjustOrder[i] = i;}
 
   // Sort indices by z value, highest first
   std::sort(legAdjustOrder, legAdjustOrder + 6, [](int a, int b) {

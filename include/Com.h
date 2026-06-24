@@ -1,15 +1,24 @@
 #pragma once
 #include <Dynamixel2Arduino.h>
+#include "State.h"
+#include "Gait.h"
+#include "Gyro.h"
 
 #define HEADER1 0xAA
 #define HEADER2 0xBB
 #define TYPE_CONTROL 0xCC
+#define TYPE_EVENT 0xCD
 
 #define UNPRESSED 0x0
 #define PRESSED 0x1
 
 #define INTERVAL_MS_SIGNAL_LOST 1000
 #define DEBUG_UART_RX 0   // 0->OFF, 1->ON
+
+enum EventCode {
+    EVENT_CONNECTED    = 1,
+    EVENT_DISCONNECTED = 2
+};
 
 enum PackageType {
     RC_CONTROL_DATA = 251,
@@ -39,6 +48,7 @@ struct RC_Control_Data_State {
 
     int8_t gyro_X;
     int8_t gyro_Y;
+    int8_t gyro_Z;
 
     uint8_t buttons;
     uint8_t misc;
@@ -66,6 +76,12 @@ struct Hexapod_Sensor_Data_Package {
     int8_t zPositions[6];
 };
 
+struct RobotStatusPacket {
+    uint8_t header;
+    uint8_t state;
+    uint8_t gait;
+};
+
 // Declare the data package variables
 extern RC_Control_Data_State rc_control_data;
 extern RC_Settings_Data_Package rc_settings_data;
@@ -73,10 +89,12 @@ extern Hexapod_Settings_Data_Package hex_settings_data;
 extern Hexapod_Sensor_Data_Package hex_sensor_data;
 
 extern byte receiveType;
+extern bool controllerConnected;
 extern ButtonEvent readButtonEvent();
 
 void setupCom();
 bool receiveComData();
 void initializeControllerPayload();
 void initializeHexPayload();
+void sendRobotData();
 

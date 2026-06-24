@@ -1,4 +1,5 @@
 #pragma once
+#include <Arduino.h>
 #include <vector>
 using std::vector;
 
@@ -41,5 +42,6 @@ const char* gaitToString(GaitType gait);
 const Gait& getGait(GaitType gaitType);
 extern Gait cGait;
 extern GaitType currentGait;
+extern uint8_t getGaitCode();
 
 

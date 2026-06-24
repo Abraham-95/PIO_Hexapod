@@ -173,8 +173,7 @@ Vector3 convertLocalLegPointToGlobal(Vector3 localLegPoint, int legIndex){
     // Assumes Global Frame: +X Right, +Y Forward
 
     float distanceFromCenterToLegBase = 110;
-    if (legIndex == 1 || legIndex == 4)
-    {
+    if (legIndex == 1 || legIndex == 4) {
         distanceFromCenterToLegBase = 95;
     }
     // Angle relative to Global +X (Right)

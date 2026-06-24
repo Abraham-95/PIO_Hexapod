@@ -86,7 +86,7 @@ const float globalLiftHeightMult = 0.5;
 const Vector3 baseLegCalibrationPosition = Vector3(0, coxa, femur+tibia);
 
 const int TIME_TO_STAND = 1000;
-const int TIME_TO_SLEEP = 30000;
+const int TIME_TO_SLEEP = 100000;
 
 const int POTENTIO_PIN = A0;
 

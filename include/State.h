@@ -3,6 +3,7 @@
 #include "Utils.h"
 #include "Gait.h"
 #include "LegManager.h"
+#include "Gyro.h"
 
 class State {
     public:
@@ -100,5 +101,5 @@ extern WalkingState *walkingState;
 extern GyroState *gyroState;
 
 const char* stateToString(State* state);
-
 void changeState(State* next);
+extern uint8_t getStateCode();

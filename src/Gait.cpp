@@ -134,9 +134,21 @@ void setGait(GaitType newGait){
 }
 
 GaitType nextGait(GaitType current) {
-  return static_cast<GaitType>((current + 1) % 6);
+    return static_cast<GaitType>((current + 1) % 6);
 }
 
 GaitType prevGait(GaitType current) {
-  return static_cast<GaitType>((current + 5) % 6);
+    return static_cast<GaitType>((current + 5) % 6);
+}
+
+uint8_t getGaitCode() {
+    switch(currentGait) {
+        case TRI:    return 0;
+        case RIPPLE: return 1;
+        case WAVE:   return 2;
+        case QUAD:   return 3;
+        case BI:     return 4;
+        case HOP:    return 5;
+        default: return 255;
+    }
 }

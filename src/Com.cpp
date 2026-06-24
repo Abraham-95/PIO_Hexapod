@@ -10,6 +10,11 @@ unsigned long rc_last_received_time = 0;
 unsigned long lastSignalMillis = 0;
 
 byte receiveType = RC_CONTROL_DATA;
+bool controllerConnected = false;
+
+int16_t gyroRoll  = 0;
+int16_t gyroPitch = 0;
+int16_t gyroYaw   = 0;
 
 #if DEBUG_UART_RX
 static uint32_t packetCount = 0;
@@ -18,23 +23,21 @@ static uint32_t lastDebugPrint = 0;
 #endif
 
 void setupCom() {
-  //pinMode(32, OUTPUT);
-  //digitalWrite(32, LOW);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
 
   Serial.begin(115200);
-  Serial2.begin(115200);
-  Serial2.setTimeout(50);
+  Serial3.begin(115200);
+  Serial3.setTimeout(50);
 
   initializeHexPayload();
   initializeControllerPayload();
 }
 
-/*void blinkLED() {
-  digitalWrite(32, HIGH);
-  delay(50);
-  digitalWrite(32, LOW);
-  delay(50);
-}*/
+void blinkLED() {
+  digitalWrite(LED_BUILTIN, HIGH); delay(50);
+  digitalWrite(LED_BUILTIN, LOW); delay(50);
+}
 
 void initializeHexPayload() {
   hex_sensor_data.type = HEXAPOD_SENSOR_DATA;
@@ -55,6 +58,7 @@ void initializeControllerPayload() {
     rc_control_data.axisRY = 0;
     rc_control_data.gyro_X = 0;
     rc_control_data.gyro_Y = 0;
+    rc_control_data.gyro_Z = 0;
     rc_control_data.buttons = UNPRESSED;
     rc_control_data.misc = UNPRESSED;
     rc_control_data.dpad = UNPRESSED;
@@ -79,8 +83,8 @@ bool receiveComData() {
   static uint8_t index;
   static uint8_t checksum;
 
-  while (Serial2.available()) {
-    uint8_t byteIn = Serial2.read();
+  while (Serial3.available()) {
+    uint8_t byteIn = Serial3.read();
     switch(state) {
       case WAIT_HEADER1: {
         checksum = 0;
@@ -111,10 +115,20 @@ bool receiveComData() {
             rc_control_data.axisRY    = (int8_t)data[6];
             rc_last_received_time = millis();
           }
-        } else {
+          else if (type == TYPE_EVENT && length == 1) {
+          switch(data[0]) {
+            case EVENT_CONNECTED: // Controller Connected
+              controllerConnected = true;
+              sendRobotData();
+              break;
+            case EVENT_DISCONNECTED: // Controller Disconnected
+                controllerConnected = false; break;
+            }
+          } else {
       #if DEBUG_UART_RX
         checksumErrorCount++;
       #endif
+          }
         }
         state = WAIT_HEADER1; break;
       }
@@ -169,5 +183,28 @@ ButtonEvent readButtonEvent() {
   prevButtons = b;
   prevDpad = d;
 
+  //if(event != BUTTON_NONE) blinkLED();
+
   return event;
 }
+
+void sendRobotData() {
+    static uint8_t lastState = 255;
+    static uint8_t lastGait  = 255;
+
+    uint8_t state = getStateCode();
+    uint8_t gait  = getGaitCode();
+
+    if(state == lastState && gait == lastGait) return;
+
+    lastState = state;
+    lastGait  = gait;
+
+    RobotStatusPacket packet;
+    packet.header = 0xAA;
+    packet.state = getStateCode();
+    packet.gait  = getGaitCode();
+
+    Serial3.write((uint8_t*)&packet,sizeof(packet));
+}
+

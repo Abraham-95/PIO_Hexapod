@@ -18,3 +18,12 @@ const char* stateToString(State* state) {
 
   return "UNKNOWN";
 }
+
+uint8_t getStateCode() {
+  if(currentState == standingState) return 0;
+  if(currentState == walkingState)  return 1;
+  if(currentState == gyroState)     return 2;
+  if(currentState == jumpingState)  return 3;
+  if(currentState == sleepState)    return 4;
+  return 255;
+}

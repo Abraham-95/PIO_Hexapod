@@ -27,9 +27,8 @@ void setup() {
 
   attachServos();
   setupCom();
-  setGait(currentGait);
   setupGyro();
-  setupDisplay();
+  setGait(currentGait);
   loadCalibrationOffsets();
 
   currentState = initializationState;
@@ -39,9 +38,6 @@ void setup() {
 }
 
 void loop() {
-  gyroUpdate();
-  drawDisplay();
-
   static unsigned long previousLoopTime = 0;
   unsigned long currentLoopTime = micros();
   if (currentLoopTime - previousLoopTime < loopPeriod) return;
@@ -101,7 +97,13 @@ void loop() {
     }
   }
   if (currentState) {currentState->loop();}
+  //sendRobotData();
+  gyroUpdate();
   updateServos();
+
+  //Freq debug
+  //static uint32_t t0 = micros(); uint32_t now = micros();
+  //Serial.println(now - t0); t0 = now;
 }
 
 
