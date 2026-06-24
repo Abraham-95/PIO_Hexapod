@@ -39,3 +39,6 @@ PIO Hexapod v1.10 -- March 14, 2026
 
 PIO Hexapod v1.11 -- June 7, 2026
  - Update Gyro with BNO085 & OLED
+
+PIO Hexapod v1.12 -- June 23, 2026
+ - Update Stabilization for Standing State
