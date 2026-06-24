@@ -1,6 +1,6 @@
-Hexapod Robot Project
-Framework : PlatformIO
-Platform : OpenRB-150
+Hexapod Robot Project <br>
+Framework : PlatformIO <br>
+Platform : OpenRB-150 <br>
 Features :
  - Microcontroller Communication
  - Finite State Machine
