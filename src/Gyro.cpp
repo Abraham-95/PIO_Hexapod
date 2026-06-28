@@ -14,7 +14,13 @@ float zmpX = 0; float zmpY = 0;
 float prevComPosX = 0; float prevComPosY = 0;
 float prevComVelX = 0; float prevComVelY = 0;
 
+static float pitchOffsetFilt = 0;
+static float rollOffsetFilt = 0;
+
 BalanceOutput balanceOutput;
+
+bool headingLock = false;
+float lockYaw = 0;
 
 void setupGyro() {
   delay(100);
@@ -26,7 +32,7 @@ void setupGyro() {
     while (1) delay(10);
   }
   // Enable Euler angles (via Rotation Vector)
-  myIMU.enableRotationVector(50); // 50ms (20Hz)
+  myIMU.enableRotationVector(10); // 50ms (20Hz)
 }
 
 void gyroUpdate() {
@@ -36,8 +42,8 @@ void gyroUpdate() {
     roll  = myIMU.getPitch() * 180.0f / PI;
     yaw   = myIMU.getYaw()   * 180.0f / PI;
   }
-  pitchFiltered += 0.15f * (pitch - pitchFiltered);
-  rollFiltered += 0.15f * (roll - rollFiltered);
+  pitchFiltered += 0.35f * (pitch - pitchFiltered);
+  rollFiltered  += 0.35f * (roll - rollFiltered);
 
   rc_control_data.gyro_X = (int16_t)rollFiltered;
   rc_control_data.gyro_Y = (int16_t)pitchFiltered;
@@ -56,19 +62,19 @@ void stabilization(BalanceMode mode) {
 
   switch(mode) {
     case STANDING_MODE:
-      deadband  = 1.5f;
-      Kp = 0.15f; Kd = 0.05f;
-      pitchGain = 0.8f; rollGain  = 0.3f; shiftGain = 1.0f;
+      deadband  = 1.0f;
+      Kp = 0.15f; Kd = 0.05f; shiftGain = 1.0f;
+      pitchGain = 0.7f; rollGain  = 0.8f;
       break;
     case WALKING_MODE:
-      deadband  = 3.0f;
-      Kp = 0.08f; Kd = 0.03f;
-      pitchGain = 0.4f; rollGain  = 0.15f; shiftGain = 0.30f;
+      deadband  = 1.0f;
+      Kp = 0.15f; Kd = 0.05f; shiftGain = 1.0f;
+      pitchGain = 0.7f; rollGain  = 0.8f;
       break;
     default:
-      deadband  = 1.5f;
-      Kp = 0.15f; Kd = 0.05f;
-      pitchGain = 0.8f; rollGain  = 0.3f; shiftGain = 1.0f;
+      deadband  = 1.0f;
+      Kp = 0.15f; Kd = 0.05f; shiftGain = 1.0f;
+      pitchGain = 0.7f; rollGain  = 0.8f;
       break;
   }
   // IMU Compensation
@@ -119,8 +125,11 @@ void stabilization(BalanceMode mode) {
   balanceOutput.yShift = constrain(Kp * errorY + Kd * comVelY * shiftGain, -20, 20);
 
   // Body Leveling
-  balanceOutput.pitchOffset = -radians(pitchComp * pitchGain);
-  balanceOutput.rollOffset  = -radians(rollComp * rollGain);
+  pitchOffsetFilt += 0.15f * ((-radians(pitchComp * pitchGain)) - pitchOffsetFilt);
+  rollOffsetFilt += 0.15f * ((-radians(rollComp * rollGain)) - rollOffsetFilt);
+
+  balanceOutput.pitchOffset = pitchOffsetFilt;
+  balanceOutput.rollOffset = rollOffsetFilt;
 
   #if DEBUG_GYRO
   static uint32_t lastPrint = 0;
@@ -129,14 +138,8 @@ void stabilization(BalanceMode mode) {
     Serial.println("\n========= BALANCE DEBUG =========");
     Serial.print("Pitch : "); Serial.print(pitchFiltered, 2);
     Serial.print("\tRoll : "); Serial.println(rollFiltered, 2);
-    Serial.print("COM X : "); Serial.print(comPosX, 2);
-    Serial.print("\tCOM Y : "); Serial.println(comPosY, 2);
-    Serial.print("COM Vel X : "); Serial.print(comVelX, 2);
-    Serial.print("\tCOM Vel Y : "); Serial.println(comVelY, 2);
-    Serial.print("ZMP X : "); Serial.print(zmpX, 2);
-    Serial.print("\tZMP Y : "); Serial.println(zmpY, 2);
-    Serial.print("Support Center X : "); Serial.print(supportCenter.x, 2);
-    Serial.print("\tSupport Center Y : "); Serial.println(supportCenter.y, 2);
+    Serial.print("PitchComp : "); Serial.print(pitchComp);
+    Serial.print("\tRollComp : "); Serial.println(rollComp);
     Serial.print("Body Shift X : "); Serial.print(balanceOutput.xShift, 2);
     Serial.print("\tBody Shift Y : "); Serial.println(balanceOutput.yShift, 2);
     Serial.print("Pitch Offset : "); Serial.print(degrees(balanceOutput.pitchOffset), 2);

@@ -20,7 +20,7 @@ void InitializationState::init() {
     for (int i = 0; i < 6; i++) {
         moveToPos(i, baseLegCalibrationPosition);
     }
-    delay(100);
+    delay(50);
 }
 
 void InitializationState::exit() {

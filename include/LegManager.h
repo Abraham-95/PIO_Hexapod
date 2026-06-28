@@ -78,7 +78,7 @@ const float maxDistanceFromGround = 200;
 const float legLandHeight = 45;
 const float legPlacementAngle = 55;
 
-const float globalSpeedMult = 0.6;
+const float globalSpeedMult = 0.5;
 const float globalRotationStrideLengthMult = 0.3;
 const float globalStrafeStrideLengthMult = 0.3;
 const float globalLiftHeightMult = 0.5;
@@ -103,8 +103,8 @@ void moveToPos(int leg, Vector3 pos);
 void attachServos();
 void saveCalibrationOffsets();
 void loadCalibrationOffsets();
-void printCalibrationOffsets();
 void updateRuntimeVariables();
 void updateServos();
 Vector3 convertLocalLegPointToGlobal(Vector3 localLegPoint, int legIndex);
 Vector3 convertGlobalLegPointToLocal(Vector3 globalLegPoint, int legIndex);
+Vector3 bodyIK(Vector3 point, float roll, float pitch);

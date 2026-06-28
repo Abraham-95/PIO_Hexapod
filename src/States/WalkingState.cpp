@@ -53,6 +53,27 @@ void WalkingState::loop() {
   joyRCurrentVector = lerp(joyRCurrentVector, joyRTargetVector, 0.06);
   joyRCurrentMagnitude = lerp(joyRCurrentMagnitude, joyRTargetMagnitude, 0.06);
 
+  bool movingStraight = abs(joyLy) > 10 && abs(joyLx) < 10 &&
+                        abs(joyRx) < 10;
+
+  if (movingStraight) {
+    if (!headingLock) {lockedYaw = yaw; headingLock = true;}
+  } else {headingLock = false;}
+
+  float yawCorrection = 0;
+  if (headingLock) {
+    float yawError = lockedYaw - yaw;
+    while (yawError > 180) yawError -= 360;
+    while (yawError < -180) yawError += 360;
+
+    if (abs(yawError) < 1.0f) yawError = 0;
+    yawCorrection = constrain(yawError * 0.8f, -15.0f, 15.0f);
+  }
+  forwardAmount = joyLCurrentVector.y;
+
+  if (headingLock) turnAmount = yawCorrection;
+  else turnAmount = joyRCurrentVector.x;
+
   float potRightPercentage = 0.5; // Adjust this value as needed
 
   for (int i = 0; i < 6; i++) {
@@ -63,8 +84,21 @@ void WalkingState::loop() {
   turnAmount = joyRCurrentVector.x;
   cGait = getGait(currentGait);
 
-  for(int i = 0; i < 6; i++){
-      moveToPos(i, getGaitPoint(i, cGait.pushFraction));
+  stabilization(WALKING_MODE);
+
+  for(int i = 0; i < 6; i++) {
+    Vector3 gaitPoint = getGaitPoint(i, cGait.pushFraction);
+    Vector3 bodyPoint = convertLocalLegPointToGlobal(gaitPoint, i);
+
+    bodyPoint.x -= balanceOutput.xShift;
+    bodyPoint.y -= balanceOutput.yShift;
+    bodyPoint.z += bodyPoint.x * sin(balanceOutput.rollOffset)
+                 - bodyPoint.y * sin(balanceOutput.pitchOffset);
+
+    Vector3 localPoint = convertGlobalLegPointToLocal(bodyPoint, i);
+
+    moveToPos(i, localPoint);
+    //moveToPos(i, getGaitPoint(i, cGait.pushFraction));
   }
 
   if (!isIdle()) {
@@ -85,7 +119,7 @@ bool WalkingState::isIdle() const {
 }
 
 Vector3 WalkingState::getGaitPoint(int leg, float pushFraction) {
-  float rotateStrideLength = joyRCurrentVector.x * globalRotationStrideLengthMult;
+  float rotateStrideLength = turnAmount * globalRotationStrideLengthMult;
 
   Vector2 strafeStrideLength = joyLCurrentVector * globalStrafeStrideLengthMult * cGait.strideLengthMult;
   strafeStrideLength.y = constrain(strafeStrideLength.y,-cGait.maxStrideLength/2, cGait.maxStrideLength/2);

@@ -26,17 +26,10 @@ Vector3 saved_offsets[NUM_LEGS] = {
     Vector3(0, 0, 0)  // leg 6
 };
 
-Vector2 joyLTargetVector;
-float joyLTargetMagnitude;
-
-Vector2 joyLCurrentVector;
-float joyLCurrentMagnitude;
-
-Vector2 joyRTargetVector;
-float joyRTargetMagnitude;
-
-Vector2 joyRCurrentVector;
-float joyRCurrentMagnitude;
+Vector2 joyLTargetVector; float joyLTargetMagnitude;
+Vector2 joyLCurrentVector; float joyLCurrentMagnitude;
+Vector2 joyRTargetVector; float joyRTargetMagnitude;
+Vector2 joyRCurrentVector; float joyRCurrentMagnitude;
 
 float points = 1000;
 
@@ -206,8 +199,7 @@ Vector3 convertGlobalLegPointToLocal(Vector3 globalPoint, int legIndex){
     // Assumes Global Frame: +X Right, +Y Forward
 
     float distanceFromCenterToLegBase = 110;
-    if (legIndex == 1 || legIndex == 4)
-    {
+    if (legIndex == 1 || legIndex == 4) {
         distanceFromCenterToLegBase = 95;
     }
     // Angle relative to Global +X (Right)
@@ -241,5 +233,16 @@ void updateRuntimeVariables() {
     //cGait = getGait((GaitType)TRI);
 
     //gyroTilt = tilt;
+}
+
+// Inverse Body Kinematics
+Vector3 bodyIK(Vector3 p, float roll, float pitch) {
+    Vector3 out = p;
+    // Roll
+    out.z += p.y * sin(roll);
+    // Pitch
+    out.z -= p.x * sin(pitch);
+
+    return out;
 }
 

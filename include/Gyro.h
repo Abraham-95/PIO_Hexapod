@@ -14,14 +14,15 @@ extern BNO080 myIMU;
 extern float roll, pitch, yaw;
 extern float pitchFiltered, rollFiltered;
 extern uint32_t lastGyroTime;
+extern float zmpX, zmpY;
+extern bool headingLock;
+extern float lockedYaw;
 
 struct BalanceOutput {
     float xShift;
     float yShift;
     float pitchOffset;
     float rollOffset;
-    float zmpX;
-    float zmpY;
 };
 
 enum BalanceMode {

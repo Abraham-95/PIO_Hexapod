@@ -91,6 +91,10 @@ void StandingState::loop() {
       bodyPoint.x -= balanceOutput.xShift;
       bodyPoint.y -= balanceOutput.yShift;
 
+      Vector3 beforeIK = bodyPoint;
+      //bodyPoint = bodyIK(bodyPoint, balanceOutput.rollOffset, balanceOutput.pitchOffset);
+      Vector3 afterIK = bodyPoint;
+
       bodyPoint.z += bodyPoint.x * sin(balanceOutput.rollOffset)
                    - bodyPoint.y * sin(balanceOutput.pitchOffset);
 
@@ -102,10 +106,19 @@ void StandingState::loop() {
 
       #if DEBUG_GYRO
       if (printDebug) {
-        Serial.print("Leg "); Serial.print(i);
-        Serial.print(" X ="); Serial.print(localPoint.x);
-        Serial.print(" Y ="); Serial.print(localPoint.y);
-        Serial.print(" Z ="); Serial.println(localPoint.z);
+        Serial.print("\nLeg "); Serial.println(i);
+        Serial.print("Global Before : "); Serial.print(beforeIK.x, 2);
+        Serial.print(", "); Serial.print(beforeIK.y, 2);
+        Serial.print(", "); Serial.println(beforeIK.z, 2);
+
+        Serial.print("Global After  : "); Serial.print(afterIK.x, 2);
+        Serial.print(", "); Serial.print(afterIK.y, 2);
+        Serial.print(", "); Serial.println(afterIK.z, 2);
+
+        Serial.print("Local Final   : "); Serial.print(localPoint.x, 2);
+        Serial.print(", "); Serial.print(localPoint.y, 2);
+        Serial.print(", "); Serial.println(localPoint.z, 2);
+        Serial.println("----------------------");
       }
       #endif
     }
