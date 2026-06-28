@@ -42,3 +42,6 @@ PIO Hexapod v1.11 -- June 7, 2026
 
 PIO Hexapod v1.12 -- June 23, 2026
  - Update Stabilization for Standing State
+
+PIO Hexapod v1.13 -- June 29, 2016
+ - Update Heading Lock for Walking
